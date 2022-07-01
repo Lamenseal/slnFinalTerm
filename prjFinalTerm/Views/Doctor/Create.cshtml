@@ -1,0 +1,56 @@
+﻿@model prjFinalTerm.ViewModels.CDoctorViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>CDoctorViewModel</h4>
+<hr />
+@using (Html.BeginForm("Create", "Doctor", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="DoctorName" class="control-label"></label>
+                    <input asp-for="DoctorName" class="form-control" />
+                    <span asp-validation-for="DoctorName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DepartmentId" class="control-label"></label>
+                    <input asp-for="DepartmentId" class="form-control" />
+                    <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Education" class="control-label"></label>
+                    <input asp-for="Education" class="form-control" />
+                    <span asp-validation-for="Education" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="JobTitle" class="control-label"></label>
+                    <input asp-for="JobTitle" class="form-control" />
+                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    @Html.Label("醫師照片", "", new { @class = "control-label col-md-2" })
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="file" name="photo" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+}
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
