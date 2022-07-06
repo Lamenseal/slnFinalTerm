@@ -35,12 +35,35 @@ namespace prjFinalTerm.Controllers
             }
             return View(datas);
         }
+        public IActionResult CreateDetail()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult CreateDetail(CDoctorDetailViewModel d)
+        {
+
+            MedicalContext db = new MedicalContext();
+            if (d.photo != null)
+            {
+                string pName = Guid.NewGuid().ToString() + ".jpg";
+                d.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
+                d.PicturePath = pName;
+            }
+            db.Members.Add(d.member);
+            db.SaveChanges();
+            d.doctor.MemberId = d.member.MemberId;
+            db.Doctors.Add(d.doctor);            
+            db.SaveChanges();
+            return RedirectToAction("Index");
+
+        }
         public IActionResult Create()
         {
             return View();
         }
         [HttpPost]
-        public IActionResult Create(CDoctorViewModel d)
+        public IActionResult Create(CDoctorDetailViewModel d)
         {
 
             MedicalContext db = new MedicalContext();
@@ -51,6 +74,7 @@ namespace prjFinalTerm.Controllers
                 d.PicturePath = pName;
             }
             db.Doctors.Add(d.doctor);
+            db.Members.Add(d.member);
             db.SaveChanges();
             return RedirectToAction("Index");
 
@@ -58,47 +82,109 @@ namespace prjFinalTerm.Controllers
         public IActionResult Delete(int? id)
         {
             MedicalContext db = new MedicalContext();
-            Doctor prod = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
+            prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            //prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            //prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+            //prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            prod.member = db.Members.FirstOrDefault(t => t.MemberId == prod.doctor.MemberId);
             if (prod != null)
             {
-                db.Doctors.Remove(prod);
+                db.Doctors.Remove(prod.doctor);
+                if (prod.member != null)
+                {
+                    db.Members.Remove(prod.member);
+                }
+
                 db.SaveChanges();
             }
+            
             return RedirectToAction("Index");
 
         }
-        public IActionResult Edit(int? id)
+        public IActionResult EditDetail(int? id)
         {
             MedicalContext db = new MedicalContext();
-            Doctor prod = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
+            prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+            prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
             if (prod == null)
                 return RedirectToAction("Index");
             return View(prod);
         }
         [HttpPost]
-        public IActionResult Edit(CDoctorViewModel p)
+        public IActionResult EditDetail(CDoctorDetailViewModel p)
         {
 
             MedicalContext db = new MedicalContext();
-            Doctor prod = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorId);
-            if (prod != null)
+            Doctor dcDb = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
+            Department dpDb = db.Departments.FirstOrDefault(s => s.DepartmentId == p.DepartmentID);
+            DepartmentCategory dpcDb = db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.DeptCategoryID);
+            Experience expDb = db.Experiences.FirstOrDefault(v => v.ExperienceId == p.ExperienceID);
+            if (dcDb != null)
             {
                 if (p.photo != null)
                 {
                     string pName = Guid.NewGuid().ToString() + ".jpg";
                     p.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
-                    prod.PicturePath = pName;
+                    dcDb.PicturePath = pName;
                 }
-                prod.DoctorName = p.DoctorName;
-                prod.DepartmentId = p.DepartmentId;
-                prod.Education = p.Education;
-                prod.JobTitle = p.JobTitle;
-
+                dcDb.DoctorName = p.DoctorName;
+                dcDb.DepartmentId = p.DepartmentID;
+                dcDb.Education = p.Education;
+                dcDb.JobTitle = p.JobTitle;
+            }
+            if (dpDb != null)
+            {
+                dpDb.DeptName = p.DepName;
+                dpDb.DeptCategoryId = p.DeptCategoryID;
+            }
+            if (dpcDb != null)
+            {
+                dpcDb.DeptCategoryName = p.DeptCategoryName;
+            }
+            if (expDb != null)
+            {
+                expDb.Experience1 = p.Experience;
             }
             db.SaveChanges();
             return RedirectToAction("Index");
 
         }
+        //public IActionResult Edit(int? id)
+        //{
+        //    MedicalContext db = new MedicalContext();
+        //    Doctor prod = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+        //    if (prod == null)
+        //        return RedirectToAction("Index");
+        //    return View(prod);
+        //}
+        //[HttpPost]
+        //public IActionResult Edit(CDoctorViewModel p)
+        //{
+
+        //    MedicalContext db = new MedicalContext();
+        //    Doctor prod = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorId);
+        //    if (prod != null)
+        //    {
+        //        if (p.photo != null)
+        //        {
+        //            string pName = Guid.NewGuid().ToString() + ".jpg";
+        //            p.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
+        //            prod.PicturePath = pName;
+        //        }
+        //        prod.DoctorName = p.DoctorName;
+        //        prod.DepartmentId = p.DepartmentId;
+        //        prod.Education = p.Education;
+        //        prod.JobTitle = p.JobTitle;
+
+        //    }
+        //    db.SaveChanges();
+        //    return RedirectToAction("Index");
+
+        //}
         public IActionResult List(CKeyWordViewModel vModel)
         {
             MedicalContext db = new MedicalContext();
@@ -124,8 +210,8 @@ namespace prjFinalTerm.Controllers
             Doctor DD = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
             prod.doctor = DD;
             prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
-            prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t=>t.DeptCategoryId==prod.department.DeptCategoryId);
             prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
             if (prod == null)
                 return RedirectToAction("Index");
             return View(prod);

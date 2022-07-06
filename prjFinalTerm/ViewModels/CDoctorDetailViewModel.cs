@@ -1,4 +1,5 @@
-﻿using prjFinalTerm.Models;
+﻿using Microsoft.AspNetCore.Http;
+using prjFinalTerm.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,12 +14,19 @@ namespace prjFinalTerm.ViewModels
         private Department _dep;
         private Experience _exp;
         private DepartmentCategory _depC;
+        private Member _memb;
         public CDoctorDetailViewModel()
         {
             _doc = new Doctor();
             _dep = new Department();
             _exp = new Experience();
             _depC = new DepartmentCategory();
+            _memb = new Member();
+        }
+        public Member member
+        {
+            get { return _memb; }
+            set { _memb = value; }
         }
         public Doctor doctor
         {
@@ -44,10 +52,14 @@ namespace prjFinalTerm.ViewModels
             get { return _doc.DoctorId; }
             set { _doc.DoctorId = value; }
         }
-        public int? MemberID
+        public int MemberID
         {
-            get { return _doc.MemberId; }
-            set { _doc.MemberId = value; }
+            get 
+            { return _memb.MemberId;
+                            }
+            set { _memb.MemberId = value;
+                _doc.MemberId = value;
+            }
         }
         [DisplayName("醫生姓名")]
         public string DoctorName {
@@ -106,5 +118,29 @@ namespace prjFinalTerm.ViewModels
             get { return _depC.DeptCategoryName; }
             set { _depC.DeptCategoryName = value; }
         }
+        public IFormFile photo { get; set; }
+        [DisplayName("身分證字號")]
+        public string IdentityID {
+            get { return _memb.IdentityId; }
+            set { _memb.IdentityId = value; }
+        }
+        [DisplayName("密碼")]
+        public string Password {
+            get { return _memb.Password; }
+            set { _memb.Password = value; }
+        }
+        [DisplayName("會員名稱")]
+        public string MemberName
+        {
+            get { return _memb.MemberName; }
+            set { _memb.MemberName = value; }
+        }
+        [DisplayName("權限")]
+        public int? Role
+        {
+            get { return _memb.Role; }
+            set { _memb.Role = value; }
+        }
+        
     }
 }
