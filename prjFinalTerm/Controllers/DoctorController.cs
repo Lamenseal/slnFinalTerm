@@ -108,10 +108,13 @@ namespace prjFinalTerm.Controllers
             CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
             prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
             Department dep =  db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
-            DepartmentCategory depC = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == dep.DeptCategoryId);
-            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            DepartmentCategory depC = null;
             if (dep != null)
+            {
+                depC = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == dep.DeptCategoryId);
                 prod.department = dep;
+            }
+            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
             if (depC != null)
                 prod.departmentCategory = depC;
             if (exp != null)
@@ -142,13 +145,10 @@ namespace prjFinalTerm.Controllers
                 doc.Education = p.Education;
                 doc.JobTitle = p.JobTitle;
             }
-            if (dep != null)
-            {
-                if (dep.DeptName!=p.DepName)
-                    db.Departments.Add(p.department);
-                else
-                    dep.DeptName = p.DepName;
-            }
+            if (dep != null && dep.DeptName!=p.DepName)
+                db.Departments.Add(p.department);
+            if (p.DepName!=null && dep==null)
+                db.Departments.Add(p.department);
             if (depC != null)
             {
                 depC.DeptCategoryName = p.DeptCategoryName;

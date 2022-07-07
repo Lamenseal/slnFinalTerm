@@ -4,7 +4,7 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>醫生詳細資料</h1>
 
 <div>
     <h4>CDoctorDetailViewModel</h4>
@@ -57,6 +57,7 @@
     </dl>
 </div>
 <div>
-    @Html.ActionLink("EditDetail", "EditDetail", new { id = Model.DoctorID }) |
-    <a asp-action="Index">Back to List</a>
+    @Html.ActionLink("修改資料", "EditDetail", new { id = Model.DoctorID }) |
+    @Html.ActionLink("醫師評論", "RatingDoctor", new { id = Model.DoctorID }) |      @*導入RatingDoctor*@
+    <a asp-action="Index">回到醫師主頁</a>
 </div>

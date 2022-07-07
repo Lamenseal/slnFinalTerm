@@ -4,7 +4,7 @@
     ViewData["Title"] = "EditDetail";
 }
 
-<h1>EditDetail</h1>
+<h1>修改詳細資料</h1>
 
 <h4>CDoctorDetailViewModel</h4>
 <hr />
@@ -15,17 +15,20 @@
             <form asp-action="EditDetail">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" name="DoctorID" value="@Model.DoctorID">
-                <input type="hidden" name="MemberID"value="@Model.MemberID">
+                <input type="hidden" name="MemberID" value="@Model.MemberID">
+                <input type="hidden" name="DepartmentID" value="@Model.DepartmentID">
+                <input type="hidden" name="DeptCategoryID" value="@Model.DeptCategoryID">
+                <input type="hidden" name="ExperienceID" value="@Model.ExperienceID">
                 <div class="form-group">
                     <label asp-for="DoctorName" class="control-label"></label>
                     <input asp-for="DoctorName" class="form-control" />
                     <span asp-validation-for="DoctorName" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="DepartmentID" class="control-label"></label>
-                    <input asp-for="DepartmentID" class="form-control" />
-                    <span asp-validation-for="DepartmentID" class="text-danger"></span>
-                </div>
+                @*<div class="form-group">
+            <label asp-for="DepartmentID" class="control-label"></label>
+            <input asp-for="DepartmentID" class="form-control" />
+            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+        </div>*@
                 <div class="form-group">
                     <label asp-for="Education" class="control-label"></label>
                     <input asp-for="Education" class="form-control" />
@@ -48,21 +51,21 @@
                     <input asp-for="Experience" class="form-control" />
                     <span asp-validation-for="Experience" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="ExperienceID" class="control-label"></label>
-                    <input asp-for="ExperienceID" class="form-control" />
-                    <span asp-validation-for="ExperienceID" class="text-danger"></span>
-                </div>
+                @*<div class="form-group">
+            <label asp-for="ExperienceID" class="control-label"></label>
+            <input asp-for="ExperienceID" class="form-control" />
+            <span asp-validation-for="ExperienceID" class="text-danger"></span>
+        </div>*@
                 <div class="form-group">
                     <label asp-for="DepName" class="control-label"></label>
                     <input asp-for="DepName" class="form-control" />
                     <span asp-validation-for="DepName" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="DeptCategoryID" class="control-label"></label>
-                    <input asp-for="DeptCategoryID" class="form-control" />
-                    <span asp-validation-for="DeptCategoryID" class="text-danger"></span>
-                </div>
+                @*<div class="form-group">
+            <label asp-for="DeptCategoryID" class="control-label"></label>
+            <input asp-for="DeptCategoryID" class="form-control" />
+            <span asp-validation-for="DeptCategoryID" class="text-danger"></span>
+        </div>*@
                 <div class="form-group">
                     <label asp-for="DeptCategoryName" class="control-label"></label>
                     <input asp-for="DeptCategoryName" class="form-control" />
@@ -76,7 +79,7 @@
     </div>
 }
     <div>
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Index">回到醫生主頁</a>
     </div>
 
     @section Scripts {
