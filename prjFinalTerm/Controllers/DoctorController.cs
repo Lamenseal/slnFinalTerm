@@ -107,9 +107,15 @@ namespace prjFinalTerm.Controllers
             MedicalContext db = new MedicalContext();
             CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
             prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
-            prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
-            prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
-            prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            Department dep =  db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            DepartmentCategory depC = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == dep.DeptCategoryId);
+            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            if (dep != null)
+                prod.department = dep;
+            if (depC != null)
+                prod.departmentCategory = depC;
+            if (exp != null)
+                prod.experience = exp;
             if (prod == null)
                 return RedirectToAction("Index");
             return View(prod);
@@ -119,35 +125,37 @@ namespace prjFinalTerm.Controllers
         {
 
             MedicalContext db = new MedicalContext();
-            Doctor dcDb = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
-            Department dpDb = db.Departments.FirstOrDefault(s => s.DepartmentId == p.DepartmentID);
-            DepartmentCategory dpcDb = db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.DeptCategoryID);
-            Experience expDb = db.Experiences.FirstOrDefault(v => v.ExperienceId == p.ExperienceID);
-            if (dcDb != null)
+            Doctor doc = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
+            Department dep = db.Departments.FirstOrDefault(s => s.DepartmentId == p.DepartmentID);
+            DepartmentCategory depC = db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.DeptCategoryID);
+            Experience exp = db.Experiences.FirstOrDefault(v => v.ExperienceId == p.ExperienceID);
+            if (doc != null)
             {
                 if (p.photo != null)
                 {
                     string pName = Guid.NewGuid().ToString() + ".jpg";
                     p.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
-                    dcDb.PicturePath = pName;
+                    doc.PicturePath = pName;
                 }
-                dcDb.DoctorName = p.DoctorName;
-                dcDb.DepartmentId = p.DepartmentID;
-                dcDb.Education = p.Education;
-                dcDb.JobTitle = p.JobTitle;
+                doc.DoctorName = p.DoctorName;
+                doc.DepartmentId = p.DepartmentID;
+                doc.Education = p.Education;
+                doc.JobTitle = p.JobTitle;
             }
-            if (dpDb != null)
+            if (dep != null)
             {
-                dpDb.DeptName = p.DepName;
-                dpDb.DeptCategoryId = p.DeptCategoryID;
+                if (dep.DeptName!=p.DepName)
+                    db.Departments.Add(p.department);
+                else
+                    dep.DeptName = p.DepName;
             }
-            if (dpcDb != null)
+            if (depC != null)
             {
-                dpcDb.DeptCategoryName = p.DeptCategoryName;
+                depC.DeptCategoryName = p.DeptCategoryName;
             }
-            if (expDb != null)
+            if (exp != null)
             {
-                expDb.Experience1 = p.Experience;
+                exp.Experience1 = p.Experience;
             }
             db.SaveChanges();
             return RedirectToAction("Index");
@@ -208,10 +216,15 @@ namespace prjFinalTerm.Controllers
             MedicalContext db = new MedicalContext();
             CDoctorDetailViewModel prod =new CDoctorDetailViewModel();
             Doctor DD = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == id);
             prod.doctor = DD;
-            prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
-            prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
-            prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+            if(DD.DepartmentId!=null)
+                prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            if (exp!= null)
+                prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            if (DD.DepartmentId!= null)
+                prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+           
             if (prod == null)
                 return RedirectToAction("Index");
             return View(prod);
