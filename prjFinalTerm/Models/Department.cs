@@ -16,7 +16,7 @@ namespace prjFinalTerm.Models
 
         public int DepartmentId { get; set; }
         public string DeptName { get; set; }
-        public int DeptCategoryId { get; set; }
+        public int? DeptCategoryId { get; set; }
 
         public virtual DepartmentCategory DeptCategory { get; set; }
         public virtual ICollection<ClinicDetail> ClinicDetails { get; set; }

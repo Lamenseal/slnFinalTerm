@@ -13,24 +13,24 @@ namespace prjFinalTerm.Controllers
     public class DoctorController : Controller
     {
         private IWebHostEnvironment _enviroment;
-        public DoctorController(IWebHostEnvironment p)
+        private readonly MedicalContext _db;
+        public DoctorController(IWebHostEnvironment p,MedicalContext db)
         {
             _enviroment = p;
+            _db = db;
         }
         public IActionResult Index(CKeyWordViewModel vModel)
         {
-            MedicalContext db = new MedicalContext();
             IEnumerable<Doctor> datas = null;
             if (string.IsNullOrEmpty(vModel.txtKeyword))
             {
-                datas = from t in db.Doctors
-                        join d in db.Departments on t.DepartmentId equals d.DepartmentId
+                datas = from t in _db.Doctors
+                        join d in _db.Departments on t.DepartmentId equals d.DepartmentId
                         select t;
-                
             }
             else
             {
-                datas = db.Doctors.Where(t => t.DoctorName.Contains(vModel.txtKeyword) ||
+                datas = _db.Doctors.Where(t => t.DoctorName.Contains(vModel.txtKeyword) ||
                 t.Education.Contains(vModel.txtKeyword) || t.JobTitle.Contains(vModel.txtKeyword));
             }
             return View(datas);
@@ -42,19 +42,17 @@ namespace prjFinalTerm.Controllers
         [HttpPost]
         public IActionResult CreateDetail(CDoctorDetailViewModel d)
         {
-
-            MedicalContext db = new MedicalContext();
             if (d.photo != null)
             {
                 string pName = Guid.NewGuid().ToString() + ".jpg";
                 d.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
                 d.PicturePath = pName;
             }
-            db.Members.Add(d.member);
-            db.SaveChanges();
+            _db.Members.Add(d.member);
+            _db.SaveChanges();
             d.doctor.MemberId = d.member.MemberId;
-            db.Doctors.Add(d.doctor);            
-            db.SaveChanges();
+            _db.Doctors.Add(d.doctor);
+            _db.SaveChanges();
             return RedirectToAction("Index");
 
         }
@@ -66,37 +64,50 @@ namespace prjFinalTerm.Controllers
         public IActionResult Create(CDoctorDetailViewModel d)
         {
 
-            MedicalContext db = new MedicalContext();
             if (d.photo != null)
             {
                 string pName = Guid.NewGuid().ToString() + ".jpg";
                 d.photo.CopyTo(new FileStream((_enviroment.WebRootPath + "/images/" + pName), FileMode.Create));
                 d.PicturePath = pName;
             }
-            db.Doctors.Add(d.doctor);
-            db.Members.Add(d.member);
-            db.SaveChanges();
+            _db.Doctors.Add(d.doctor);
+            _db.Members.Add(d.member);
+            _db.SaveChanges();
             return RedirectToAction("Index");
 
         }
         public IActionResult Delete(int? id)
         {
-            MedicalContext db = new MedicalContext();
+            
             CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
-            prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
-            //prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
-            //prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
-            //prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
-            prod.member = db.Members.FirstOrDefault(t => t.MemberId == prod.doctor.MemberId);
+            prod.doctor = _db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            prod.department = _db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            prod.departmentCategory = _db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+            prod.experience = _db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            prod.member = _db.Members.FirstOrDefault(t => t.MemberId == prod.doctor.MemberId);
             if (prod != null)
             {
-                db.Doctors.Remove(prod.doctor);
+                if (prod.departmentCategory != null)
+                {
+                    _db.DepartmentCategories.Remove(prod.departmentCategory);
+                }
+                if (prod.department != null) 
+                {
+                    _db.Departments.Remove(prod.department);
+                }
+                if (prod.experience != null) 
+                {
+                    _db.Experiences.Remove(prod.experience);
+                }
                 if (prod.member != null)
                 {
-                    db.Members.Remove(prod.member);
+                    _db.Members.Remove(prod.member);
                 }
+                _db.Doctors.Remove(prod.doctor);
+                
+                
 
-                db.SaveChanges();
+                _db.SaveChanges();
             }
             
             return RedirectToAction("Index");
@@ -104,17 +115,16 @@ namespace prjFinalTerm.Controllers
         }
         public IActionResult EditDetail(int? id)
         {
-            MedicalContext db = new MedicalContext();
             CDoctorDetailViewModel prod = new CDoctorDetailViewModel();
-            prod.doctor = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
-            Department dep =  db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+            prod.doctor = _db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            Department dep =  _db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
             DepartmentCategory depC = null;
             if (dep != null)
             {
-                depC = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == dep.DeptCategoryId);
+                depC = _db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == dep.DeptCategoryId);
                 prod.department = dep;
             }
-            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+            Experience exp = _db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
             if (depC != null)
                 prod.departmentCategory = depC;
             if (exp != null)
@@ -126,12 +136,11 @@ namespace prjFinalTerm.Controllers
         [HttpPost]
         public IActionResult EditDetail(CDoctorDetailViewModel p)
         {
-
-            MedicalContext db = new MedicalContext();
-            Doctor doc = db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
-            Department dep = db.Departments.FirstOrDefault(s => s.DepartmentId == p.DepartmentID);
-            DepartmentCategory depC = db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.DeptCategoryID);
-            Experience exp = db.Experiences.FirstOrDefault(v => v.ExperienceId == p.ExperienceID);
+            Doctor doc = _db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
+            Department dep = _db.Departments.FirstOrDefault(s => s.DepartmentId == p.doctor.DepartmentId);
+            DepartmentCategory depC = _db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.departmentCategory.DeptCategoryId);
+            Experience exp = _db.Experiences.FirstOrDefault(v => v.DoctorId == p.DoctorID);
+            Member mem = _db.Members.FirstOrDefault(x => x.MemberId == doc.MemberId);
             if (doc != null)
             {
                 if (p.photo != null)
@@ -141,23 +150,44 @@ namespace prjFinalTerm.Controllers
                     doc.PicturePath = pName;
                 }
                 doc.DoctorName = p.DoctorName;
+                mem.MemberName = p.DoctorName;
                 doc.DepartmentId = p.DepartmentID;
                 doc.Education = p.Education;
                 doc.JobTitle = p.JobTitle;
             }
-            if (dep != null && dep.DeptName!=p.DepName)
-                db.Departments.Add(p.department);
-            if (p.DepName!=null && dep==null)
-                db.Departments.Add(p.department);
-            if (depC != null)
-            {
+            if (depC != null && depC.DeptCategoryName != p.DeptCategoryName)
                 depC.DeptCategoryName = p.DeptCategoryName;
+            if (p.DeptCategoryName != null && depC == null) 
+            {
+                _db.DepartmentCategories.Add(p.departmentCategory);
+                _db.SaveChanges();
+                depC = _db.DepartmentCategories.FirstOrDefault(s => s.DeptCategoryName == p.DeptCategoryName);
             }
-            if (exp != null)
+
+            if (dep != null && dep.DeptName != p.DepName)
+                dep.DeptName = p.DepName;
+            if (p.DepName != null && dep == null)
+            {
+                p.department.DeptCategoryId = depC.DeptCategoryId;
+                _db.Departments.Add(p.department);
+                _db.SaveChanges();
+                dep = _db.Departments.FirstOrDefault(s => s.DeptName == p.DepName);
+                doc.DepartmentId= dep.DepartmentId;
+                dep.DeptCategoryId = depC.DeptCategoryId;
+            }
+
+
+            if (exp != null && exp.Experience1 != p.Experience)
             {
                 exp.Experience1 = p.Experience;
             }
-            db.SaveChanges();
+            if (p.Experience != null && exp == null)
+            {
+                p.experience.DoctorId = p.doctor.DoctorId;
+                _db.Experiences.Add(p.experience);
+            }
+
+            _db.SaveChanges();
             return RedirectToAction("Index");
 
         }
@@ -195,35 +225,34 @@ namespace prjFinalTerm.Controllers
         //}
         public IActionResult List(CKeyWordViewModel vModel)
         {
-            MedicalContext db = new MedicalContext();
             IEnumerable<Doctor> datas = null;
             if (string.IsNullOrEmpty(vModel.txtKeyword))
             {
-                datas = from t in db.Doctors
+                datas = from t in _db.Doctors
                         select t;
                         
                 
             }
             else
             {
-                datas = db.Doctors.Where(t => t.DoctorName.Contains(vModel.txtKeyword) ||
+                datas = _db.Doctors.Where(t => t.DoctorName.Contains(vModel.txtKeyword) ||
                 t.Education.Contains(vModel.txtKeyword) || t.JobTitle.Contains(vModel.txtKeyword));
             }
             return View(datas);
         }
         public IActionResult Details(int? id)
         {
-            MedicalContext db = new MedicalContext();
+           
             CDoctorDetailViewModel prod =new CDoctorDetailViewModel();
-            Doctor DD = db.Doctors.FirstOrDefault(t => t.DoctorId == id);
-            Experience exp = db.Experiences.FirstOrDefault(t => t.DoctorId == id);
+            Doctor DD = _db.Doctors.FirstOrDefault(t => t.DoctorId == id);
+            Experience exp = _db.Experiences.FirstOrDefault(t => t.DoctorId == id);
             prod.doctor = DD;
             if(DD.DepartmentId!=null)
-                prod.department = db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
+                prod.department = _db.Departments.FirstOrDefault(t => t.DepartmentId == prod.doctor.DepartmentId);
             if (exp!= null)
-                prod.experience = db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
+                prod.experience = _db.Experiences.FirstOrDefault(t => t.DoctorId == prod.doctor.DoctorId);
             if (DD.DepartmentId!= null)
-                prod.departmentCategory = db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
+                prod.departmentCategory = _db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryId == prod.department.DeptCategoryId);
            
             if (prod == null)
                 return RedirectToAction("Index");

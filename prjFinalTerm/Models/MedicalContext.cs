@@ -54,14 +54,14 @@ namespace prjFinalTerm.Models
         public virtual DbSet<Treatment> Treatments { get; set; }
         public virtual DbSet<TreatmentDetail> TreatmentDetails { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=Medical;Integrated Security=True");
-            }
-        }
+//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//        {
+//            if (!optionsBuilder.IsConfigured)
+//            {
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+//                optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=Medical;Integrated Security=True");
+//            }
+//        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -278,7 +278,6 @@ namespace prjFinalTerm.Models
                 entity.HasOne(d => d.DeptCategory)
                     .WithMany(p => p.Departments)
                     .HasForeignKey(d => d.DeptCategoryId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Department_DepartmentCategory");
             });
 
@@ -327,23 +326,17 @@ namespace prjFinalTerm.Models
 
             modelBuilder.Entity<Experience>(entity =>
             {
-                entity.HasKey(e => e.DoctorId);
-
                 entity.ToTable("Experience");
 
-                entity.Property(e => e.DoctorId)
-                    .ValueGeneratedNever()
-                    .HasColumnName("DoctorID");
+                entity.Property(e => e.ExperienceId).HasColumnName("ExperienceID");
+
+                entity.Property(e => e.DoctorId).HasColumnName("DoctorID");
 
                 entity.Property(e => e.Experience1).HasColumnName("Experience");
 
-                entity.Property(e => e.ExperienceId)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("ExperienceID");
-
                 entity.HasOne(d => d.Doctor)
-                    .WithOne(p => p.Experience)
-                    .HasForeignKey<Experience>(d => d.DoctorId)
+                    .WithMany(p => p.Experiences)
+                    .HasForeignKey(d => d.DoctorId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Experience_Doctor");
             });

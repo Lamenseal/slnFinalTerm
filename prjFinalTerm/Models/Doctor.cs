@@ -11,6 +11,7 @@ namespace prjFinalTerm.Models
         {
             Articles = new HashSet<Article>();
             ClinicDetails = new HashSet<ClinicDetail>();
+            Experiences = new HashSet<Experience>();
             RatingDoctors = new HashSet<RatingDoctor>();
             Treatments = new HashSet<Treatment>();
         }
@@ -25,9 +26,9 @@ namespace prjFinalTerm.Models
 
         public virtual Department Department { get; set; }
         public virtual Member Member { get; set; }
-        public virtual Experience Experience { get; set; }
         public virtual ICollection<Article> Articles { get; set; }
         public virtual ICollection<ClinicDetail> ClinicDetails { get; set; }
+        public virtual ICollection<Experience> Experiences { get; set; }
         public virtual ICollection<RatingDoctor> RatingDoctors { get; set; }
         public virtual ICollection<Treatment> Treatments { get; set; }
     }

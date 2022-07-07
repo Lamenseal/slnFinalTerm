@@ -97,7 +97,11 @@ namespace prjFinalTerm.ViewModels
             get { return _exp.ExperienceId; }
             set { _exp.ExperienceId = value; }
         }
-
+        public int ExperienceDocID
+        {
+            get { return _exp.DoctorId; }
+            set { _exp.DoctorId = value; }
+        }
 
         //public int DepartmentID {
         //    get { return department.DepartmentId; }
