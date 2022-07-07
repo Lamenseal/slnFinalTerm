@@ -87,14 +87,6 @@ namespace prjFinalTerm.Controllers
             prod.member = _db.Members.FirstOrDefault(t => t.MemberId == prod.doctor.MemberId);
             if (prod != null)
             {
-                if (prod.departmentCategory != null)
-                {
-                    _db.DepartmentCategories.Remove(prod.departmentCategory);
-                }
-                if (prod.department != null) 
-                {
-                    _db.Departments.Remove(prod.department);
-                }
                 if (prod.experience != null) 
                 {
                     _db.Experiences.Remove(prod.experience);
@@ -137,7 +129,7 @@ namespace prjFinalTerm.Controllers
         public IActionResult EditDetail(CDoctorDetailViewModel p)
         {
             Doctor doc = _db.Doctors.FirstOrDefault(t => t.DoctorId == p.DoctorID);
-            Department dep = _db.Departments.FirstOrDefault(s => s.DepartmentId == p.doctor.DepartmentId);
+            Department dep = _db.Departments.FirstOrDefault(s => s.DepartmentId== p.doctor.DepartmentId);
             DepartmentCategory depC = _db.DepartmentCategories.FirstOrDefault(u => u.DeptCategoryId == p.departmentCategory.DeptCategoryId);
             Experience exp = _db.Experiences.FirstOrDefault(v => v.DoctorId == p.DoctorID);
             Member mem = _db.Members.FirstOrDefault(x => x.MemberId == doc.MemberId);
@@ -155,17 +147,32 @@ namespace prjFinalTerm.Controllers
                 doc.Education = p.Education;
                 doc.JobTitle = p.JobTitle;
             }
-            if (depC != null && depC.DeptCategoryName != p.DeptCategoryName)
-                depC.DeptCategoryName = p.DeptCategoryName;
+            if (p.DeptCategoryName != null && depC != null)
+            {
+                if (_db.DepartmentCategories.Where(t => t.DeptCategoryName.Contains(p.DeptCategoryName)) != null)
+                {
+                    depC = _db.DepartmentCategories.FirstOrDefault(t => t.DeptCategoryName == p.DeptCategoryName);
+                    dep.DeptCategoryId = depC.DeptCategoryId;
+                }
+                else
+                    _db.DepartmentCategories.Add(p.departmentCategory);
+            }            
             if (p.DeptCategoryName != null && depC == null) 
             {
                 _db.DepartmentCategories.Add(p.departmentCategory);
                 _db.SaveChanges();
                 depC = _db.DepartmentCategories.FirstOrDefault(s => s.DeptCategoryName == p.DeptCategoryName);
             }
-
-            if (dep != null && dep.DeptName != p.DepName)
-                dep.DeptName = p.DepName;
+            if (p.DepName != null && dep != null) 
+            {
+                if (_db.Departments.Where(t => t.DeptName.Contains(p.DepName)) != null)
+                {
+                    dep = _db.Departments.FirstOrDefault(t => t.DeptName==p.DepName);
+                    doc.DepartmentId = dep.DepartmentId;
+                }
+                else
+                    _db.Departments.Add(p.department);
+            }
             if (p.DepName != null && dep == null)
             {
                 p.department.DeptCategoryId = depC.DeptCategoryId;
@@ -175,7 +182,6 @@ namespace prjFinalTerm.Controllers
                 doc.DepartmentId= dep.DepartmentId;
                 dep.DeptCategoryId = depC.DeptCategoryId;
             }
-
 
             if (exp != null && exp.Experience1 != p.Experience)
             {
